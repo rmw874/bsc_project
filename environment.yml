@@ -1,0 +1,38 @@
+name: mgr
+channels:
+  - pytorch
+  - nvidia
+  - anaconda
+  - conda-forge
+  - defaults
+dependencies:
+  - colorama
+  - cudatoolkit=11.8
+  - numba
+  - matplotlib
+  - openblas
+  - pandas
+  - scikit-image
+  - numpy
+  - scikit-learn
+  - scipy
+  - tqdm
+  - wandb
+  - wheel
+  - ipython
+  - pip
+  - pytorch::pytorch=2.2
+  - pytorch::pytorch-cuda=12.1
+  - pip:
+      - jupyter-client
+      - jupyter-core
+      - jupyterlab
+      - randomname
+      - kornia
+      - opencv_python_headless
+      - joblib
+      - pillow
+      - albumentations
+      - torchmetrics
+      - adabelief_pytorch
+      - segmentation_models_pytorch
