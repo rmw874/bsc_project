@@ -7,7 +7,6 @@ channels:
   - defaults
 dependencies:
   - colorama
-  - cudatoolkit=11.8
   - numba
   - matplotlib
   - openblas
@@ -21,8 +20,6 @@ dependencies:
   - wheel
   - ipython
   - pip
-  - pytorch::pytorch=2.2
-  - pytorch::pytorch-cuda=12.1
   - pip:
       - jupyter-client
       - jupyter-core
