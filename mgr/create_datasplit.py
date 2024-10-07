@@ -31,7 +31,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    folders = [f for f in glob(args.root_dirs) if Path(f).is_dir()]
+    #folders = [f for f in glob(args.root_dirs) if Path(f).is_dir()]
+    folders = [f for f in glob(args.root_dirs + "/*") if Path(f).is_file()]
     train, val, test = create_splits(folders, args.val_ratio, args.test_ratio, args.random_seed)
 
     train_df = pd.DataFrame({"folders": train})
