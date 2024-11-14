@@ -3,8 +3,9 @@ import cv2  # You may need to install this with `pip install opencv-python`
 import numpy as np
 from skimage.measure import label, regionprops
 
+dimensions = 1024
 
-def load_images_and_masks(image_dir, mask_dir, img_size=(1024, 1024)):
+def load_images_and_masks(image_dir, mask_dir, img_size=(dimensions, dimensions)):
     images = []
     masks = []
     
@@ -18,22 +19,23 @@ def load_images_and_masks(image_dir, mask_dir, img_size=(1024, 1024)):
         # Load and resize the image
         img = cv2.imread(img_path)
         img = cv2.resize(img, img_size)
+        img = img.transpose(2, 0, 1)  # Convert to CHW format
         img = img / 255.0  # Normalize the image
         images.append(img)
         
         # Load and resize the mask
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
         mask = cv2.resize(mask, img_size)
+        mask = np.expand_dims(mask, axis=0)  # Add a channel dimension
         mask = mask / 255.0  # Normalize the mask to [0, 1]
         masks.append(mask)
     
     images = np.array(images, dtype=np.float32)
     masks = np.array(masks, dtype=np.float32)
-    masks = np.expand_dims(masks, axis=-1)  # Add a channel dimension for masks
 
     return images, masks
 
-def load_image(image_dir, img_size=(1024,1024)):
+def load_image(image_dir, img_size=(dimensions,dimensions)):
     img = cv2.imread(image_dir)
     img = cv2.resize(img, img_size)
     img = img/255 #normailze pixel values

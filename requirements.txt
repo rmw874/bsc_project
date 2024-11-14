@@ -1,16 +1,12 @@
-tensorflow==2.10.0  # Adjust based on your version needs
+tensorflow==2.10.0
 numpy==1.23.5
 opencv-python==4.8.0.74
 matplotlib==3.8.0
 pandas==1.5.3
 scikit-learn==1.2.2
 Pillow==9.4.0
+pyyaml==6.0
+albumentations==1.3.0
 
 # Optional but recommended for visualization and monitoring
 tensorboard==2.10.1
-
-# If using YAML configuration files
-pyyaml==6.0
-
-# Additional packages for augmentation, if needed
-albumentations==1.3.0
