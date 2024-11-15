@@ -25,9 +25,9 @@ from train import get_model
 
 logger = logging.getLogger(__name__)
 
-# This is hardcoded and only applies to birth book pages
-COLUMN_NAMES = ["ID", "BIRTH_YEAR", "CHILD_NAME", "PARENTS"]
-COLUMN_ID = [1, 2, 4, 5]
+# Hardcoded, and only applies to shiplog (more specifically the dataset we are working with)
+COLUMN_NAMES = ["YEAR", "DATE", "LATITUDE", "LONGITUDE", "WATER TEMP"]
+COLUMN_ID = [1, 2, 3, 4, 5]
 
 
 def run(args):
