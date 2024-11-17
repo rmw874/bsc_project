@@ -12,7 +12,7 @@
 #. /etc/profile.d/modules.sh
 #module load anaconda3/5.3.1
 
-module load python/3.9                 # Load necessary modules
+module load python/3.11                # Load necessary modules
 module load tensorflow/2.11.0          # Load TensorFlow module
 source /path/to/your/venv/bin/activate # Activate virtual environment
 
