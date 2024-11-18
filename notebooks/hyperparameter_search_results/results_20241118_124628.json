@@ -1,0 +1,44 @@
+[
+  {
+    "params": {
+      "learning_rate": 0.00011288378916846884,
+      "batch_size": 16
+    },
+    "best_loss": 0.017866499722003937
+  },
+  {
+    "params": {
+      "learning_rate": 1e-05,
+      "batch_size": 8
+    },
+    "best_loss": 1.1925653219223022
+  },
+  {
+    "params": {
+      "learning_rate": 1.623776739188721e-05,
+      "batch_size": 16
+    },
+    "best_loss": 0.8654672503471375
+  },
+  {
+    "params": {
+      "learning_rate": 0.0001438449888287663,
+      "batch_size": 16
+    },
+    "best_loss": 0.06076742336153984
+  },
+  {
+    "params": {
+      "learning_rate": 0.0007847599703514606,
+      "batch_size": 8
+    },
+    "best_loss": 0.029314164072275162
+  },
+  {
+    "params": {
+      "learning_rate": 6.951927961775606e-05,
+      "batch_size": 16
+    },
+    "best_loss": 0.035334907472133636
+  }
+]

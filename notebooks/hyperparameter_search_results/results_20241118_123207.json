@@ -1,0 +1,16 @@
+[
+  {
+    "params": {
+      "learning_rate": 0.00011288378916846884,
+      "batch_size": 16
+    },
+    "best_loss": 0.017866499722003937
+  },
+  {
+    "params": {
+      "learning_rate": 1e-05,
+      "batch_size": 8
+    },
+    "best_loss": 1.1925653219223022
+  }
+]
