@@ -1,0 +1,35 @@
+Activating conda environment: piratbog
+Using Python from /home/rmw874/miniforge3/envs/piratbog/bin/python
+Python 3.10.15
+Checking GPU availability...
+Thu Nov 28 14:24:33 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 545.23.08              Driver Version: 545.23.08    CUDA Version: 12.3     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Quadro RTX 6000                Off | 00000000:14:00.0 Off |                  Off |
+| 33%   24C    P8               8W / 260W |      0MiB / 24576MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   1  Quadro RTX 6000                Off | 00000000:15:00.0 Off |                  Off |
+| 33%   24C    P8              16W / 260W |      0MiB / 24576MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+CUDA available: True
+Starting training script
+/home/rmw874/piratbog/segv4/scripts/train_w_dice.py:171: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = GradScaler()
+Training Epoch 1:   0%|          | 0/12 [00:00<?, ?batch/s]/home/rmw874/piratbog/segv4/scripts/train_w_dice.py:121: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+slurmstepd: error: *** JOB 4284 ON hendrixgpu13fl CANCELLED AT 2024-11-28T14:27:56 ***

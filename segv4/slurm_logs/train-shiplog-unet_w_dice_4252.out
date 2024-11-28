@@ -1,0 +1,48 @@
+Activating conda environment: piratbog
+Using Python from /home/rmw874/miniforge3/envs/piratbog/bin/python
+Python 3.10.15
+Checking GPU availability...
+Thu Nov 28 12:44:01 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 545.23.08              Driver Version: 545.23.08    CUDA Version: 12.3     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  Quadro RTX 6000                Off | 00000000:14:00.0 Off |                  Off |
+| 33%   24C    P8               8W / 260W |      0MiB / 24576MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   1  Quadro RTX 6000                Off | 00000000:15:00.0 Off |                  Off |
+| 33%   24C    P8              16W / 260W |      0MiB / 24576MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   2  Quadro RTX 6000                Off | 00000000:39:00.0 Off |                  Off |
+| 33%   24C    P8              12W / 260W |      0MiB / 24576MiB |      0%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|  No running processes found                                                           |
++---------------------------------------------------------------------------------------+
+CUDA available: True
+Starting training script
+Epoch 1/200
+Training Epoch 1:   0%|          | 0/12 [00:00<?, ?batch/s]Fetching item 17
+Fetching item 23
+Fetching item 10
+Fetching item 19
+Fetching item 6
+Fetching item 2
+Loading batch...
+Batch loaded, starting forward pass...
+Fetching item 7
+Fetching item 14
+Fetching item 0
+Fetching item 4
+slurmstepd: error: *** JOB 4252 ON hendrixgpu13fl CANCELLED AT 2024-11-28T13:45:08 ***
