@@ -1,0 +1,26 @@
+Activating conda environment: mgr
+Using Python from /home/dxq257/miniforge3/envs/mgr/bin/python
+Python 3.10.15
+Starting training script
+/home/dxq257/piratbog/segmentationV4/scripts/train.py:77: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler()
+/home/dxq257/piratbog/segmentationV4/scripts/train.py:93: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast():
+Traceback (most recent call last):
+  File "/home/dxq257/piratbog/segmentationV4/scripts/train.py", line 94, in <module>
+    outputs = model(img_tensor)  # [batch, num_classes, height, width]
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/dxq257/piratbog/segmentationV4/scripts/model.py", line 81, in forward
+    xe11 = relu(self.bn11(self.e11(x)))
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 458, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 454, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Expected 3D (unbatched) or 4D (batched) input to conv2d, but got input of size: [8, 1, 3, 1248, 1600]

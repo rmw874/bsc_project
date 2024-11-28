@@ -1,0 +1,32 @@
+Activating conda environment: mgr
+Using Python from /home/dxq257/miniforge3/envs/mgr/bin/python
+Python 3.10.15
+Starting training script
+/home/dxq257/piratbog/segmentationV4/scripts/train.py:77: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler()
+Traceback (most recent call last):
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1131, in _try_get_data
+    data = self._data_queue.get(timeout=timeout)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/queue.py", line 180, in get
+    self.not_empty.wait(remaining)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/threading.py", line 324, in wait
+    gotit = waiter.acquire(True, timeout)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/_utils/signal_handling.py", line 67, in handler
+    _error_if_any_worker_fails()
+RuntimeError: DataLoader worker (pid 2233274) is killed by signal: Killed. 
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/dxq257/piratbog/segmentationV4/scripts/train.py", line 84, in <module>
+    for img_tensor, mask_tensor in dataloader:
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 630, in __next__
+    data = self._next_data()
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1327, in _next_data
+    idx, data = self._get_data()
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1283, in _get_data
+    success, data = self._try_get_data()
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1144, in _try_get_data
+    raise RuntimeError(f'DataLoader worker (pid(s) {pids_str}) exited unexpectedly') from e
+RuntimeError: DataLoader worker (pid(s) 2233274) exited unexpectedly
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=3728.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.

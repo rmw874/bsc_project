@@ -1,0 +1,33 @@
+Activating conda environment: mgr
+Using Python from /home/dxq257/miniforge3/envs/mgr/bin/python
+Python 3.10.15
+Starting training script
+/home/dxq257/piratbog/segmentationV4/scripts/train.py:77: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler()
+[ WARN:0@4.505] global loadsave.cpp:241 findDecoder imread_('data/processed/images/8013620831-0104.jpg-t.png'): can't open/read file: check file path/integrity
+[ WARN:0@4.557] global loadsave.cpp:241 findDecoder imread_('data/processed/images/8013620831-0063.jpg-t.png'): can't open/read file: check file path/integrity
+Traceback (most recent call last):
+  File "/home/dxq257/piratbog/segmentationV4/scripts/train.py", line 84, in <module>
+    for img_tensor, mask_tensor in dataloader:
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 630, in __next__
+    data = self._next_data()
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1344, in _next_data
+    return self._process_data(data)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 1370, in _process_data
+    data.reraise()
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/_utils.py", line 706, in reraise
+    raise exception
+TypeError: Caught TypeError in DataLoader worker process 0.
+Original Traceback (most recent call last):
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py", line 309, in _worker_loop
+    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 52, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py", line 52, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/dxq257/piratbog/segmentationV4/scripts/dataset.py", line 51, in __getitem__
+    class_mask = color2class(mask)
+  File "/home/dxq257/piratbog/segmentationV4/scripts/utils.py", line 5, in color2class
+    green_channel = mask[:, :, 1] # 1 for green since (hieght, width (R, G, B))
+TypeError: 'NoneType' object is not subscriptable
+

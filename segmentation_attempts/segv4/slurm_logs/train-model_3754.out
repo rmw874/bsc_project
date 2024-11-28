@@ -1,0 +1,20 @@
+Activating conda environment: mgr
+Using Python from /home/dxq257/miniforge3/envs/mgr/bin/python
+Python 3.10.15
+Starting training script
+/home/dxq257/piratbog/segmentationV4/scripts/train.py:77: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  scaler = torch.cuda.amp.GradScaler()
+/home/dxq257/piratbog/segmentationV4/scripts/train.py:93: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast():
+Traceback (most recent call last):
+  File "/home/dxq257/piratbog/segmentationV4/scripts/train.py", line 94, in <module>
+    outputs = model(img_tensor)  # [batch, num_classes, height, width]
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/dxq257/piratbog/segmentationV4/scripts/model.py", line 118, in forward
+    xd41 = relu(self.dbn41(self.d41(xu44)))
+  File "/home/dxq257/miniforge3/envs/mgr/lib/python3.10/site-packages/torch/nn/functional.py", line 1500, in relu
+    result = torch.relu(input)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 976.00 MiB. GPU 0 has a total capacity of 23.64 GiB of which 27.31 MiB is free. Including non-PyTorch memory, this process has 23.61 GiB memory in use. Of the allocated memory 20.71 GiB is allocated by PyTorch, and 2.72 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
