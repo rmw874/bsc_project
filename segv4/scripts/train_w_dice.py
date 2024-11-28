@@ -5,6 +5,7 @@ import torch
 import os
 import cv2
 from torch.nn.functional import relu, one_hot, cross_entropy
+from metrics import dice_per_class, iou_per_class, plot_metric_heatmap, calculate_tp_fp_fn, mean_iou, mean_dice, mean_pixel_accuracy
 from torch.amp import autocast, GradScaler
 from tqdm import tqdm
 from torch.utils.data import DataLoader
@@ -82,34 +83,62 @@ def visualize_batch(epoch, img_tensor, mask_tensor, outputs, loss, criterion):
         img_resized = img_tensor[0].permute(1, 2, 0).cpu().numpy()
         mask_resized = mask_tensor[0].cpu().numpy()
 
-        plt.figure(figsize=(20, 5))
-        
-        plt.subplot(1, 4, 1)
+        ### HEATMAP
+        result = calculate_tp_fp_fn(N_CLASSES, outputs, mask_tensor)
+        dice_scores = dice_per_class(result)
+        iou_scores = iou_per_class(result)
+        class_labels = ['Year', 'Date', 'Longitude', 'Latitude','Temperature','Background']
+
+
+        # Start the figure
+        plt.figure(figsize=(20, 10))  # Adjust size for a larger grid
+
+        # Top row: original 4 plots
+        plt.subplot(2, 4, 1)
         plt.imshow(img_resized)
         plt.title('Original Image (Resized)')
         
-        plt.subplot(1, 4, 2)
+        plt.subplot(2, 4, 2)
         plt.imshow(mask_resized, cmap='tab10')
         plt.title('Ground Truth (Resized)')
         
-        plt.subplot(1, 4, 3)
+        plt.subplot(2, 4, 3)
         plt.imshow(pred, cmap='tab10')
         plt.title(f'Prediction (Epoch {epoch+1})')
         
-        plt.subplot(1, 4, 4)
+        plt.subplot(2, 4, 4)
         plt.imshow(weight_map, cmap='hot')
         plt.colorbar()
         plt.title('BG Weights')
         
+        # Bottom row: Dice and IoU heatmaps
+        plt.subplot(2, 4, 5)
+        plot_metric_heatmap(dice_scores, "Dice", class_labels)  # Use existing function
+
+        plt.subplot(2, 4, 6)
+        plot_metric_heatmap(iou_scores, "IoU", class_labels)  # Use existing function
+
+        # Leave bottom-right plots blank if only 6 total plots
+        plt.subplot(2, 4, 7)
+        plt.axis('off')  # Empty subplot
+        
+        plt.subplot(2, 4, 8)
+        plt.axis('off')  # Empty subplot
+        
+        # Add a title and save
         plt.suptitle(f'Loss: {loss:.4f}', fontsize=24)
+        plt.tight_layout(rect=[0, 0, 1, 0.95])  # Leave space for title
         plt.savefig(f'results/dice/epoch_{epoch+1}_lr_{LEARNING_RATE}_bs_{BATCH_SIZE}.png')
         plt.close()
 
-def train_epoch(epoch, model, dataloader, criterion, optimizer, scaler, device):
-    """Train for one epoch"""
+def train_epoch(epoch, model, dataloader, criterion, optimizer, scaler, device, num_classes):
+    """Train for one epoch with metrics in progress bar."""
     model.train()
     epoch_losses = []
-    
+    mean_ious = []
+    mean_dices = []
+    mean_pixel_accuracies = []
+
     with tqdm(dataloader, desc=f"Training Epoch {epoch + 1}", unit="batch") as pbar:
         for batch_idx, (img_tensor, mask_tensor) in enumerate(pbar):
             with train_step_context():
@@ -128,10 +157,30 @@ def train_epoch(epoch, model, dataloader, criterion, optimizer, scaler, device):
                 scaler.step(optimizer)
                 scaler.update()
                 
+                # Record loss
                 loss_value = loss.item()
                 epoch_losses.append(loss_value)
-                pbar.set_postfix({'loss': f'{loss_value:.4f}'})
-                
+
+                # Metrics calculation
+                pred = torch.argmax(outputs, dim=1)  # Convert logits to class predictions
+                results = calculate_tp_fp_fn(num_classes, pred, mask_tensor)
+
+                mean_iou_value = mean_iou(results).item()
+                mean_dice_value = mean_dice(results).item()
+                mean_pixel_accuracy_value = mean_pixel_accuracy(results).item()
+
+                mean_ious.append(mean_iou_value)
+                mean_dices.append(mean_dice_value)
+                mean_pixel_accuracies.append(mean_pixel_accuracy_value)
+
+                # Update progress bar with metrics
+                pbar.set_postfix({
+                    'loss': f'{loss_value:.4f}',
+                    'mean_iou': f'{mean_iou_value:.4f}',
+                    'mean_dice': f'{mean_dice_value:.4f}',
+                    'mean_pixel_acc': f'{mean_pixel_accuracy_value:.4f}',
+                })
+
                 # Visualization
                 if (epoch + 1) % 5 == 0 and batch_idx == 0:
                     visualize_batch(epoch, img_tensor, mask_tensor, outputs, loss_value, criterion)
@@ -139,7 +188,11 @@ def train_epoch(epoch, model, dataloader, criterion, optimizer, scaler, device):
                 # Clean up
                 del outputs, loss
     
-    return epoch_losses
+    return epoch_losses, {
+        'mean_iou': sum(mean_ious) / len(mean_ious),
+        'mean_dice': sum(mean_dices) / len(mean_dices),
+        'mean_pixel_accuracy': sum(mean_pixel_accuracies) / len(mean_pixel_accuracies),
+    }
 
 def worker_init_fn(worker_id):
     torch.cuda.set_device(0)  # Ensure workers use the correct GPU
