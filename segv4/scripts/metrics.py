@@ -3,11 +3,11 @@ import numpy as np
 import torch
 import seaborn as sns
 import matplotlib.pyplot as plt
-from torchmetrics import MulticlassConfusionMatrix
+from torchmetrics.classification import MulticlassConfusionMatrix
 
 def calculate_tp_fp_fn(num_classes, pred, target):
     """Calculate the true positives, false positives and false negatives for each class"""
-    confmat = MulticlassConfusionMatrix(num_classes=num_classes)
+    confmat = MulticlassConfusionMatrix(num_classes=num_classes).to('cuda')
     conf_matrix = confmat(pred, target)
     TP = conf_matrix.diag()
     FP = conf_matrix.sum(dim=0) - TP
@@ -36,15 +36,12 @@ def plot_metric_heatmap(metric_values, metric_name, class_labels):
     metric_values = metric_values.cpu().numpy()
     
     # Create a heatmap
-    plt.figure(figsize=(10, 6))
     sns.heatmap(metric_values[np.newaxis, :], annot=True, fmt=".2f", cmap="Blues", 
                 xticklabels=class_labels, yticklabels=[metric_name])
     plt.title(f"{metric_name} per Class")
     plt.xlabel("Classes")
-    plt.ylabel(metric_name)
-    plt.show()
 
-def iou_per_class(results):
+def calculate_iou_per_class(results):
     """
     Compute the IoU for each class.
     
@@ -63,7 +60,7 @@ def iou_per_class(results):
     return iou_per_class
 
 # mean iou
-def mean_iou(results):
+def calculate_mean_iou(results):
     """
     Compute the mean Intersection over Union (IoU) across all classes.
     
@@ -73,14 +70,14 @@ def mean_iou(results):
     Returns:
         mean_iou (torch.Tensor): Mean IoU across all classes.
     """
-    iou_per_class = iou_per_class(results)
+    iou_per_class = calculate_iou_per_class(results)
     mean_iou = iou_per_class.mean()
     return mean_iou
 
 
 
 # dice Similarity Coefficient
-def dice_per_class(results):
+def calculate_dice_per_class(results):
     """
     Compute the Dice Similarity Coefficient for each class.
     
@@ -99,7 +96,7 @@ def dice_per_class(results):
     return dice_per_class
 
 # mean dice 
-def mean_dice(results):
+def calculate_mean_dice(results):
     """
     Compute the mean Dice Similarity Coefficient across all classes.
     
@@ -109,13 +106,13 @@ def mean_dice(results):
     Returns:
         mean_dice (torch.Tensor): Mean Dice across all classes.
     """
-    dice_per_class = dice_per_class(results)
+    dice_per_class = calculate_dice_per_class(results)
     mean_dice = dice_per_class.mean()
     return mean_dice
 
 
 # mean pixel accuracy
-def mean_pixel_accuracy(results):
+def calculate_mean_pixel_accuracy(results):
     """
     Compute the mean pixel accuracy across all classes.
     
