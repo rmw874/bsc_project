@@ -6,3 +6,4 @@ m3.pt
 __pycache__
 *.h5
 *.pth
+slurm_logs/

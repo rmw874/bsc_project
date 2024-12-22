@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./segv5/scripts",
+        "./scripts"
+    ]
+}

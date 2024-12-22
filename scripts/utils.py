@@ -2,6 +2,8 @@ import torch
 import numpy as np
 
 def color2class(mask):
+    if mask is None:
+        raise ValueError(f"Failed to read mask at {mask}")
     green_channel = mask[:, :, 1]  # 1 for green since (height, width, channels)
     class_mask = np.zeros_like(green_channel)
 
@@ -17,5 +19,6 @@ def color2class(mask):
     class_mask[green_channel == 4] = 3  # Longitude
     class_mask[green_channel == 5] = 4  # Water Temperature
     class_mask[green_channel == 255] = 5  # Background
+    class_mask[green_channel == 0] = 5  # Also background (maybe?)
 
     return class_mask

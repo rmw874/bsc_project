@@ -3,11 +3,12 @@ import numpy as np
 import torch
 import seaborn as sns
 import matplotlib.pyplot as plt
-from torchmetrics import MulticlassConfusionMatrix
+from torchmetrics.classification import MulticlassConfusionMatrix
+
+epsilon = 1e-7
 
 def calculate_tp_fp_fn(num_classes, pred, target):
-    """Calculate the true positives, false positives and false negatives for each class"""
-    confmat = MulticlassConfusionMatrix(num_classes=num_classes)
+    confmat = MulticlassConfusionMatrix(num_classes=num_classes).to('cuda')
     conf_matrix = confmat(pred, target)
     TP = conf_matrix.diag()
     FP = conf_matrix.sum(dim=0) - TP
@@ -18,7 +19,6 @@ def calculate_tp_fp_fn(num_classes, pred, target):
         "FP": FP,
         "FN": FN
     }
-
 
 def plot_metric_heatmap(metric_values, metric_name, class_labels):
     """
@@ -32,19 +32,15 @@ def plot_metric_heatmap(metric_values, metric_name, class_labels):
     Returns:
         None: Displays the heatmap.
     """
-    # Convert tensor to numpy array for plotting
     metric_values = metric_values.cpu().numpy()
     
     # Create a heatmap
-    plt.figure(figsize=(10, 6))
     sns.heatmap(metric_values[np.newaxis, :], annot=True, fmt=".2f", cmap="Blues", 
                 xticklabels=class_labels, yticklabels=[metric_name])
     plt.title(f"{metric_name} per Class")
     plt.xlabel("Classes")
-    plt.ylabel(metric_name)
-    plt.show()
 
-def iou_per_class(results):
+def calculate_iou_per_class(results):
     """
     Compute the IoU for each class.
     
@@ -58,29 +54,30 @@ def iou_per_class(results):
     FP = results["FP"]
     FN = results["FN"]
     
-    # Compute IoU for each class
-    iou_per_class = TP / (TP + FP + FN + 1e-7)  # Add epsilon to avoid division by zero
+    iou_per_class = TP / (TP + FP + FN + epsilon)
     return iou_per_class
 
-# mean iou
-def mean_iou(results):
+def calculate_mean_iou(results):
     """
-    Compute the mean Intersection over Union (IoU) across all classes.
+    Compute the mean Intersection over Union (IoU) across all classes, 
+    excluding classes absent in the ground truth.
     
     Args:
         results (dict): Dictionary containing "TP", "FP", and "FN" as tensors of shape [num_classes].
     
     Returns:
-        mean_iou (torch.Tensor): Mean IoU across all classes.
+        mean_iou (torch.Tensor): Mean IoU across all present classes.
     """
-    iou_per_class = iou_per_class(results)
-    mean_iou = iou_per_class.mean()
+    iou_per_class = calculate_iou_per_class(results)
+    
+    # Identify classes with ground truth (TP + FN > 0)
+    valid_classes = (results["TP"] + results["FN"]) > 0
+    
+    # Calculate the mean IoU for valid classes only
+    mean_iou = iou_per_class[valid_classes].mean() if valid_classes.any() else torch.tensor(0.0)
     return mean_iou
 
-
-
-# dice Similarity Coefficient
-def dice_per_class(results):
+def calculate_dice_per_class(results):
     """
     Compute the Dice Similarity Coefficient for each class.
     
@@ -94,12 +91,10 @@ def dice_per_class(results):
     FP = results["FP"]
     FN = results["FN"]
     
-    # Compute Dice for each class
-    dice_per_class = 2 * TP / (2 * TP + FP + FN + 1e-7)  # Add epsilon to avoid division by zero
+    dice_per_class = 2 * TP / (2 * TP + FP + FN + epsilon)
     return dice_per_class
 
-# mean dice 
-def mean_dice(results):
+def calculate_mean_dice(results):
     """
     Compute the mean Dice Similarity Coefficient across all classes.
     
@@ -109,13 +104,11 @@ def mean_dice(results):
     Returns:
         mean_dice (torch.Tensor): Mean Dice across all classes.
     """
-    dice_per_class = dice_per_class(results)
+    dice_per_class = calculate_dice_per_class(results)
     mean_dice = dice_per_class.mean()
     return mean_dice
 
-
-# mean pixel accuracy
-def mean_pixel_accuracy(results):
+def calculate_mean_pixel_accuracy(results):
     """
     Compute the mean pixel accuracy across all classes.
     
@@ -128,12 +121,40 @@ def mean_pixel_accuracy(results):
     TP = results["TP"]
     FP = results["FP"]
     
-    # Compute mean pixel accuracy
-    mean_pixel_accuracy = TP.sum() / (TP.sum() + FP.sum() + 1e-7)  # Add epsilon to avoid division by zero
+    mean_pixel_accuracy = TP.sum() / (TP.sum() + FP.sum() + epsilon)
     return mean_pixel_accuracy
 
+def calculate_accuracy(results):
+    TP = results["TP"]
+    FP = results["FP"]
+    FN = results["FN"]
 
-## Confusion Matrix (per class) for visualization
+    # Compute True Negatives (TN) for each class
+    TN = 6 - (TP + FP + FN)
+    
+    # Compute accuracy as sum of TP + TN over total elements (TP + FP + FN + TN for all classes)
+    total_correct = (TP + TN).sum()  # Sum of TP + TN across all classes
+    total = (TP + FP + FN + TN).sum()  # Total elements (for all classes)
+    
+    accuracy = total_correct / total  # Accuracy formula
+    return accuracy
 
-## 	Class-wise IoU or Dice Heatmap
+def calculate_precision_per_class(results):
+    TP = results["TP"]
+    FP = results["FP"]
 
+    return TP / (TP + FP + 1e-7)
+
+def calculate_mean_precision(results):
+    precision_per_class = calculate_precision_per_class(results)
+    return precision_per_class.mean()
+
+def calculate_recall_per_class(results):
+    TP = results["TP"]
+    FN = results["FN"]
+    
+    return TP / (TP + FN + 1e-7)
+
+def calculate_mean_recall(results):
+    recall_per_class = calculate_recall_per_class(results)
+    return recall_per_class.mean()
