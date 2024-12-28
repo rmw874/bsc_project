@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn.functional import relu
 
-class UNet(nn.Module):
+class SparseUNET(nn.Module):
     def __init__(self, n_class):
         super().__init__()
         

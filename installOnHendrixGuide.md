@@ -10,8 +10,8 @@ $ bash Miniforge3-$(uname)-$(uname -m).sh
 Også få den til at installere det her bs:
 
 ```
-$ conda create --name mgr python=3.10
-$ conda activate mgr
+$ conda create --name pirate python=3.10
+$ conda activate pirate
 $ conda install -c pytorch -c nvidia -c conda-forge -c defaults \
     colorama \
     cudatoolkit=11.8 \

@@ -3,7 +3,7 @@
 #SBATCH --output=slurm_logs/%x_%j.out        # Output file with job name and ID
 #SBATCH --cpus-per-task=4                    # Number of CPU cores per task
 #SBATCH --mem=32G                            # Memory required per node
-#SBATCH --gres=gpu:2                         # Request 3 GPUs
+#SBATCH --gres=gpu:1                         # Request 3 GPUs
 #SBATCH --exclude=hendrixgpu12fl,hendrixgpu11fl
 
 # Load Conda

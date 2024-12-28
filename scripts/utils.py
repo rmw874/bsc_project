@@ -7,7 +7,7 @@ def color2class(mask):
     green_channel = mask[:, :, 1]  # 1 for green since (height, width, channels)
     class_mask = np.zeros_like(green_channel)
 
-    valid_values = [1, 2, 3, 4, 5, 255]
+    valid_values = [0, 1, 2, 3, 4, 5, 255]
 
     unique_values = np.unique(green_channel)
     if not np.all(np.isin(unique_values, valid_values)):
@@ -19,6 +19,6 @@ def color2class(mask):
     class_mask[green_channel == 4] = 3  # Longitude
     class_mask[green_channel == 5] = 4  # Water Temperature
     class_mask[green_channel == 255] = 5  # Background
-    class_mask[green_channel == 0] = 5  # Also background (maybe?)
+    class_mask[green_channel == 0] = 5  # Also background
 
     return class_mask
