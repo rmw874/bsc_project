@@ -1,0 +1,22 @@
+Region: eu-north-1
+Image:
+  Os: alinux2
+HeadNode:
+  InstanceType: t3.micro
+  Networking:
+    SubnetId: subnet-01b00c10a06faa0c5
+  Ssh:
+    KeyName: oscar-pirate-key
+Scheduling:
+  Scheduler: slurm
+  SlurmQueues:
+  - Name: queue1
+    ComputeResources:
+    - Name: t3micro
+      Instances:
+      - InstanceType: g4dn.xlarge
+      MinCount: 0
+      MaxCount: 4
+    Networking:
+      SubnetIds:
+      - subnet-0c1dbcc40bcb2a682
