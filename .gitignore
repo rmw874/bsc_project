@@ -6,5 +6,9 @@ m3.pt
 __pycache__
 *.h5
 *.pth
+*.sh
+*.jpg
+*.jpeg
+*.png
 slurm_logs/
 results/

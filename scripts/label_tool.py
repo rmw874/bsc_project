@@ -8,10 +8,7 @@ import os
 import json
 from pathlib import Path
 
-# Get the directory where the script is located
 SCRIPT_DIR = Path(__file__).parent.absolute()
-
-# Create Flask app with explicit template folder
 app = Flask(__name__, 
             template_folder=os.path.join(SCRIPT_DIR, 'templates'))
 
@@ -21,20 +18,18 @@ class LabelingSession:
         self.load_data()
     
     def load_data(self):
-        # Load images
         self.image_files = sorted([
             f for f in os.listdir(self.crops_dir) 
             if f.endswith('.png') and f != "annotations.json"
         ])
         
-        # Load existing annotations if any
+        # load existing annotations if any
         self.annotations_file = self.crops_dir / "annotations.json"
         self.annotations = {}
         if self.annotations_file.exists():
             with open(self.annotations_file) as f:
                 self.annotations = json.load(f)
         
-        # Load metadata if available
         self.metadata = {}
         metadata_file = self.crops_dir / "crop_metadata.json"
         if metadata_file.exists():
@@ -201,11 +196,11 @@ def setup_templates():
         f.write(index_html)
     print(f"Created template at: {index_path}")
 
-# Create templates before initializing routes
 setup_templates()
 
 # Initialize session
-session = LabelingSession('../data/ocr_training_crops')
+# session = LabelingSession('../data/ocr_training_crops')
+session = LabelingSession('../data/ocr_validation_crops')
 
 @app.route('/')
 def index():

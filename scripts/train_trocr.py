@@ -1,180 +1,134 @@
 import os
-import torch
-import json
-import shutil
 from pathlib import Path
-import random
-import numpy as np
+import json
+import torch
+from PIL import Image
 from transformers import (
     TrOCRProcessor, 
     VisionEncoderDecoderModel,
     Seq2SeqTrainingArguments,
     Seq2SeqTrainer
 )
-from PIL import Image
-from tqdm.auto import tqdm
 from torch.utils.data import Dataset
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 class OCRDataset(Dataset):
-    def __init__(self, data_dir, processor):
-        self.data_dir = Path(data_dir)
+    def __init__(self, image_dir: Path, processor, max_length: int = 64):
+        self.image_dir = image_dir
         self.processor = processor
-        
-        # Load annotations
-        with open(self.data_dir / "annotations.json") as f:
+        self.max_length = max_length
+        self.examples = []
+        self.load_annotations()
+    
+    def load_annotations(self):
+        json_path = self.image_dir / "annotations.json"
+        with open(json_path, 'r') as f:
             self.annotations = json.load(f)
-            
-        self.examples = list(self.annotations.items())
         
-        # Cache for processed images
-        self.cache = {}
+        self.examples = [
+            {
+                "image_path": str(self.image_dir / img_name),
+                "text": text
+            }
+            for img_name, text in self.annotations.items()
+            if os.path.exists(self.image_dir / img_name)
+        ]
     
     def __len__(self):
         return len(self.examples)
     
     def __getitem__(self, idx):
-        filename, text = self.examples[idx]
+        example = self.examples[idx]
+        image = Image.open(example["image_path"]).convert("RGB")
+        processed = self.processor(image, return_tensors="pt")
+        pixel_values = processed.pixel_values.squeeze()  # remove batch dimension
         
-        # Check cache first
-        if idx in self.cache:
-            return self.cache[idx]
-        
-        # Load and process image
-        image_path = self.data_dir / filename
-        image = Image.open(image_path).convert("RGB")
-        
-        # Process image
-        pixel_values = np.array(
-            self.processor(
-                image, 
-                return_tensors=None
-            ).pixel_values
-        )
-        
-        # Process text
-        labels = self.processor.tokenizer(
-            text,
+        encoded = self.processor.tokenizer(
+            example["text"],
             padding="max_length",
-            max_length=128,
+            max_length=self.max_length,
             truncation=True,
             return_tensors="pt"
-        ).input_ids.squeeze(0)
+        )
         
-        # Convert to torch tensor immediately
-        pixel_values = torch.from_numpy(pixel_values)
+        labels = encoded.input_ids.squeeze()  # remove batch dimension
         
-        # Cache the processed data
-        item = {
+        return {
             "pixel_values": pixel_values,
             "labels": labels
         }
-        self.cache[idx] = item
-        
-        return item
 
 def collate_fn(examples):
-    # Stack pre-converted tensors
     pixel_values = torch.stack([example["pixel_values"] for example in examples])
     labels = torch.stack([example["labels"] for example in examples])
     
     return {
         "pixel_values": pixel_values,
-        "labels": labels,
+        "labels": labels
     }
 
 class CustomTrainer(Seq2SeqTrainer):
-    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
-        """
-        How the loss is computed by Trainer. By default, all models return the loss in the first element.
-        """
-        # Remove num_items_in_batch from inputs if it exists
+    def compute_loss(self, model, inputs, return_outputs=False):
         if isinstance(inputs, dict) and "num_items_in_batch" in inputs:
-            inputs = {k: v for k, v in inputs.items() if k != "num_items_in_batch"}
+            del inputs["num_items_in_batch"]
             
         outputs = model(**inputs)
         loss = outputs.loss
         
         return (loss, outputs) if return_outputs else loss
-        
-    def log(self, logs):
-        """Override logging to show progress bar"""
-        logs = super().log(logs)
-        
-        if hasattr(self, 'epoch_pbar'):
-            self.epoch_pbar.update(1)
-        if hasattr(self, 'step_pbar'):
-            self.step_pbar.update(1)
-            
-            if 'loss' in logs:
-                self.step_pbar.set_postfix({
-                    'loss': f"{logs['loss']:.4f}",
-                    'lr': f"{logs.get('learning_rate', 0):.2e}"
-                })
-        
-        return logs
-    
-    def _setup_progress_bars(self):
-        """Setup progress bars for training"""
-        self.epoch_pbar = tqdm(total=self.args.num_train_epochs, desc="Epochs")
-        total_steps = len(self.train_dataset) // (self.args.per_device_train_batch_size * self.args.gradient_accumulation_steps)
-        self.step_pbar = tqdm(total=total_steps, desc="Training steps")
 
-def train_trocr():
-    # Prepare data
-    print("Preparing datasets...")
-    
-    # Set deterministic operations for reproducibility
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    
+def main():
     train_dir = Path("data/ocr_training_crops")
-    val_dir = Path("data/ocr_training_crops")  # Using same dir for simplicity
+    val_dir = Path("data/ocr_validation_crops")
     
-    # Initialize model and processor
-    print("Loading model and processor...")
-    processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
-    model = VisionEncoderDecoderModel.from_pretrained("microsoft/trocr-base-handwritten")
-    
-    # Move model to GPU if available
+    # base model and processor
+    model_name = "microsoft/trocr-base-handwritten"
+    processor = TrOCRProcessor.from_pretrained(model_name)
+    model = VisionEncoderDecoderModel.from_pretrained(model_name)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     
-    # Create datasets
-    print("Creating datasets...")
+    model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
+    model.config.pad_token_id = processor.tokenizer.pad_token_id
+    model.config.vocab_size = model.config.decoder.vocab_size
+    
     train_dataset = OCRDataset(train_dir, processor)
     val_dataset = OCRDataset(val_dir, processor)
     
     print(f"Training examples: {len(train_dataset)}")
     print(f"Validation examples: {len(val_dataset)}")
     
-    # Training arguments
+    sample_batch = collate_fn([train_dataset[0], train_dataset[1]])
+    print(f"\nSample batch shapes:")
+    print(f"Pixel values: {sample_batch['pixel_values'].shape}")
+    print(f"Labels: {sample_batch['labels'].shape}")
+    
     training_args = Seq2SeqTrainingArguments(
-        output_dir="results/trocr_finetuned",
-        num_train_epochs=15,
-        per_device_train_batch_size=6,
-        per_device_eval_batch_size=6,
+        output_dir="results/trocr_finetuned_1250",
+        num_train_epochs=75,                     
+        per_device_train_batch_size=32,         
+        per_device_eval_batch_size=32,           
         fp16=True,
-        gradient_accumulation_steps=2,
-        logging_steps=5,
+        gradient_accumulation_steps=1,           
+        logging_steps=10,
         eval_strategy="epoch",
         save_strategy="epoch",
-        save_total_limit=2,
+        save_total_limit=3,                      
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
+        report_to="none",
         learning_rate=5e-5,
-        warmup_ratio=0.1,  # Warmup for 10% of steps
+        warmup_ratio=0.1,
         weight_decay=0.01,
-        gradient_checkpointing=True,
-        report_to=[],  # Disable wandb
-        # Memory optimizations
-        dataloader_num_workers=2,  # Reduced workers
+        gradient_checkpointing=False,            
+        dataloader_num_workers=4,                
         dataloader_pin_memory=True,
-        # Other settings
-        disable_tqdm=True,
-        seed=42,
+        generation_max_length=64,
+        predict_with_generate=True,
+        remove_unused_columns=False  
     )
     
-    # Initialize trainer
     trainer = CustomTrainer(
         model=model,
         args=training_args,
@@ -183,25 +137,13 @@ def train_trocr():
         data_collator=collate_fn,
     )
     
-    # Setup progress bars
-    trainer._setup_progress_bars()
-    
-    # Train
-    print("Starting training...")
+    print("\nStarting training...")
     trainer.train()
     
-    # Close progress bars
-    if hasattr(trainer, 'epoch_pbar'):
-        trainer.epoch_pbar.close()
-    if hasattr(trainer, 'step_pbar'):
-        trainer.step_pbar.close()
-    
-    # Save final model
-    print("Saving model...")
-    model.save_pretrained("results/trocr_finetuned/final_model")
-    processor.save_pretrained("results/trocr_finetuned/final_model")
-    
+    print("\nSaving model...")
+    trainer.save_model("results/trocr_finetuned_1250/final_model")
+    processor.save_pretrained("results/trocr_finetuned_1250/final_model")
     print("Training complete!")
 
 if __name__ == "__main__":
-    train_trocr()
+    main()

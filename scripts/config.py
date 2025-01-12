@@ -2,11 +2,11 @@ import os
 
 # Training parameters
 BATCH_SIZE = 4
-EPOCHS = 300
+EPOCHS = 250
 LEARNING_RATE = 1e-4
 N_CLASSES = 6
-TARGET_SIZE = (3200 // 2, 2496 // 2)  # Half resolution
-RUN_NAME = "deeplab_5_bugged"
+TARGET_SIZE = (3200 // 2, 2496 // 2)
+RUN_NAME = "segmentation_model"
 
 # Data paths
 DATA_ROOT = "data/processed"
@@ -24,26 +24,12 @@ os.makedirs(RESULTS_DIR, exist_ok=True)
 TVERSKY_PARAMS = {
     'alpha': 0.3,
     'beta': 0.7,
-    'boundary_weight': 20.0,
-    'vertical_consistency_weight': 3.0,
-    'sigma': 3.0
 }
-
-# Class weights for loss function
-CLASS_WEIGHTS = [
-    1.5,  # Year
-    1.5,  # Date
-    2.0,  # Latitude
-    1.5,  # Longitude
-    1.5,  # Temperature
-    2.5,  # Background
-]
 
 # Post-processing parameters
 POST_PROCESSING = {
     'min_region_size': 1000,
-    'expected_row_height': 50,
-    'min_row_separation': 3
+    'expected_row_height': 40,
 }
 
 # DataLoader parameters
@@ -62,8 +48,8 @@ VISUALIZATION = {
 }
 
 # Visualization frequency
-TRAIN_VIZ_FREQ = 1  # Visualize every N epochs during training
-VAL_VIZ_FREQ = 1   # Visualize every N epochs during validation
+TRAIN_VIZ_FREQ = 50  # Visualize every N epochs during training
+VAL_VIZ_FREQ = 10   # Visualize every N epochs during validation
 
 # Device configuration
 CUDA_LAUNCH_BLOCKING = "1"
