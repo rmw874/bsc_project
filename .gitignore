@@ -1,5 +1,10 @@
 .DS_Store
-data/
+data/*
+!data/.gitkeep
+results/*
+!results/.gitkeep
+slurm_logs/*
+!slurm_logs/.gitkeep
 m1.pt
 m2.pt
 m3.pt
@@ -10,5 +15,3 @@ __pycache__
 *.jpg
 *.jpeg
 *.png
-slurm_logs/
-results/
